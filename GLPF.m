@@ -25,6 +25,7 @@ function imgOut = GLPF(img, D0)
         D = sqrt(U.^2 + V.^2);
 
         H = exp(-(D.^2)./(2*(D0^2)));
+        H = fftshift(H);
 
         % Apply the filter mask
         G = F .* H;
@@ -36,6 +37,6 @@ function imgOut = GLPF(img, D0)
         img_filtered = real(ifft2(G));
         img_filtered = img_filtered(1:N, 1:M);
 
-        imgOut(1:N, 1:M, ch) = im2uint8(img_filtered);
+        imgOut(1:N, 1:M, ch) = img_filtered;
     end
 end
