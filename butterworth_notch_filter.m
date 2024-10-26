@@ -1,4 +1,4 @@
-function outImg = butterworth_notch_filter(img, notch_points, D0, n)
+function outImg = butterworth_notch_filter(img, notch_points, D0, n, isShow)
 % BUTTERWORTH_NOTCH_FILTER mengaplikasikan butterworth notch filter pada
 % citra di titik tertentu
 %   note : fungsi juga mengaplikasikan notch pada titik pasangan (-x,-y)
@@ -19,8 +19,8 @@ function outImg = butterworth_notch_filter(img, notch_points, D0, n)
     for k = 1:size(notch_points, 1)
         % Shift the notch points to match the centered frequency 
         % coordinates
-        u0 = notch_points(k, 1) - floor(N/2);
-        v0 = notch_points(k, 2) - floor(M/2);
+        u0 = notch_points(k, 2) - floor(N/2);
+        v0 = notch_points(k, 1) - floor(M/2);
         u1 = -u0;
         v1 = -v0;
         
@@ -45,7 +45,7 @@ function outImg = butterworth_notch_filter(img, notch_points, D0, n)
         F = H .* F;
 
         % Display spectrum result on one color channel
-        if ch == 1
+        if ch == 1 && isShow
             S2 = log(1+abs(F)); 
             figure, imshow(S2,[]);
         end

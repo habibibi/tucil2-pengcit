@@ -1,36 +1,49 @@
-function outImg = ideal_notch_filter(img, notch_points, D0, isShow)
-% IDEAL_NOTCH_FILTER mengaplikasikan ideal notch filter pada
-% citra di titik tertentu
-%   note : fungsi juga mengaplikasikan notch pada titik pasangan (-x,-y)
+function outImg = line_notch_filter(img, xs, ys, D0, n, isShow)
+% LINE_NOTCH_FILTER mengaplikasikan line butterworth notch filter pada
+% citra di axis x dan y tertentu
+%   note : fungsi juga mengaplikasikan notch pada axis pasangan -x atau -y
     [N, M, C] = size(img);
     outImg = zeros(size(img));
 
     % {{Generate Filter}}
     % Generate meshgrid
-    u = -floor(N/2):floor(N/2)-1;
-    v = -floor(M/2):floor(M/2)-1;
+    u = -floor(N/2):ceil(N/2)-1;
+    v = -floor(M/2):ceil(M/2)-1;
     [U, V] = meshgrid(v, u);
     
     % Initialize the filter with all ones (pass all frequencies initially)
     H = ones(N, M);
     
     % Create the notch filter by zeroing out regions around each specified 
-    % notch point with its pair
-    for k = 1:size(notch_points, 1)
+    % notch point
+    for k = 1:size(xs,1)
         % Shift the notch points to match the centered frequency 
         % coordinates
-        u0 = notch_points(k, 2) - floor(N/2);
-        v0 = notch_points(k, 1) - floor(M/2);
-        u1 = -u0;
-        v1 = -v0;
+        x = xs(k) - floor(M/2);
+        x1 = -x;
         
         % Calculate the distance from the current notch point
-        D_k0 = sqrt((U - v0).^2 + (V - u0).^2);
-        D_k1 = sqrt((U - v1).^2 + (V - u1).^2);
+        D_k0 = abs(U - x);
+        D_k1 = abs(U - x1);
+
+        % Apply the Butterworth formula
+        H = H ./ (1 + (D0 ./ D_k0).^(2*n));
+        H = H ./ (1 + (D0 ./ D_k1).^(2*n));
+    end
+
+    for k = 1:size(ys,1)
+        % Shift the notch points to match the centered frequency 
+        % coordinates
+        y = ys(k) - floor(N/2);
+        y1 = -y;
         
-        % Set frequencies within radius D0 around the notch point to zero (block)
-        H(D_k0 <= D0) = 0;
-        H(D_k1 <= D0) = 0;
+        % Calculate the distance from the current notch point
+        D_k0 = abs(V - y);
+        D_k1 = abs(V - y1);
+
+        % Apply the Butterworth formula
+        H = H ./ (1 + (D0 ./ D_k0).^(2*1));
+        H = H ./ (1 + (D0 ./ D_k1).^(2*1));
     end
 
     for ch = 1:C
@@ -45,7 +58,7 @@ function outImg = ideal_notch_filter(img, notch_points, D0, isShow)
 
         % Display spectrum result on one color channel
         if ch == 1 && isShow
-            S2 = log(1+abs(F)); % use abs to compute the magnitude (handling imaginary) and use log to brighten display 
+            S2 = log(1+abs(F)); 
             figure, imshow(S2,[]);
         end
 
