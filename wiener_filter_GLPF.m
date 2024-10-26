@@ -32,8 +32,6 @@ D = sqrt(U.^2 + V.^2);
 H = exp(-(D.^2)./(2*(D0^2)));
 H = fftshift(H);
 
-imshow(H);
-
 % Create wiener filter
 H2 = abs(H).^2;
 Hw = (1 ./ H) .* (H2 ./ (H2 + k));
